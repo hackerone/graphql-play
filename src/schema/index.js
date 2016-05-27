@@ -28,7 +28,7 @@ const BucketType = new GraphQLObjectType({
     name: {type: new GraphQLNonNull(GraphQLString)},
     user: {
       type: UserType,
-      resolve: () => {}
+      resolve: (root, args) => dataUser.find( x => x.id === root.user_id )
     }
   }
 });
@@ -77,12 +77,36 @@ const getMedia = {
 }
 
 
-const getUsers = {
+const getAllUsers = {
   type: new GraphQLList(UserType),
   resolve: () => dataUser
 }
 
+const getAllBuckets = {
+  type: new GraphQLList(BucketType),
+  resolve: () => dataBucket
+}
 
+const getAllMedia = {
+  type: new GraphQLList(MediaType),
+  resolve: () => dataMedia
+}
+
+const addUser = {
+  type: UserType,
+  args: {
+    name: { type: GraphQLString }
+  },
+  resolve: (root, {name} ) => {
+    const id = dataUser.length;
+    const user = {
+      id,
+      name
+    };
+    dataUser.push(user);
+    return user;
+  }
+}
 
 const Schema = new GraphQLSchema({
   query: new GraphQLObjectType({
@@ -91,7 +115,15 @@ const Schema = new GraphQLSchema({
       user: getUser,
       bucket: getBucket,
       media: getMedia,
-      users: getUsers
+      users: getAllUsers,
+      medias: getAllMedia,
+      buckets: getAllBuckets
+    }
+  }),
+  mutation: new GraphQLObjectType({
+    name: 'Mutation',
+    fields: {
+      user: addUser
     }
   })
 });
